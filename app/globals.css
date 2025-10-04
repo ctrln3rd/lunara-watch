@@ -8,8 +8,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-roboto: var(--font-roboto-mono);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +21,145 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  @apply font-roboto overflow-x-hidden;
+}
+button{
+  @apply cursor-pointer hover:translate-0.5;
+}
+
+/* animations.css */
+
+/* 🌧️ Rain */
+.animate-rain {
+  @apply absolute inset-0 overflow-hidden pointer-events-none;
+}
+.raindrop {
+  @apply absolute w-1 h-3 bg-blue-900;
+  animation: fall 0.8s linear infinite;
+}
+@keyframes fall {
+  to {
+    transform: translateY(100vh);
+  }
+}
+
+/* ❄️ Snow */
+.animate-snow {
+  @apply absolute inset-0 overflow-hidden pointer-events-none;
+}
+.snowflake {
+  @apply absolute text-white text-xl;
+  animation: snow 5s linear infinite;
+}
+@keyframes snow {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+  }
+}
+
+/* ⚡ Thunderstorm */
+.animate-thunderstorm {
+  @apply absolute inset-0;
+  background: transparent;
+}
+.flash {
+  @apply absolute backdrop-blur-lg aspect-square w-1/2 bg-white blur-3xl opacity-0;
+  animation: flash 4s infinite;
+}
+@keyframes flash {
+  0%, 50%, 100% { opacity: 0; }
+  25%, 75% { opacity: 1; }
+}
+
+/* 🌫️ Fog */
+.fog {
+  @apply absolute inset-0 overflow-hidden;
+}
+.fog-move {
+  @apply absolute w-2/1 h-1/2 bg-gray-500/30 blur-2xl;
+  animation: drift 30s linear infinite;
+}
+@keyframes drift {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(50%); }
+}
+
+/* ☀️ Clear skies */
+.animate-clear {
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 10%, transparent 40%);
+  animation: pulse 6s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+/*backgrounds*/
+/* globals.css */
+
+/* global.css */
+.bg-clear {
+  @apply bg-gradient-to-b from-slate-700 to-slate-900;
+}
+
+.bg-cloud {
+  @apply bg-gradient-to-b from-gray-700 to-gray-900;
+}
+
+.bg-overcast {
+  @apply bg-gradient-to-b from-gray-800 to-black;
+}
+
+.bg-fog {
+  @apply bg-gradient-to-b from-slate-600 to-slate-900;
+}
+
+.bg-drizzle {
+  @apply bg-gradient-to-b from-slate-600 to-slate-900;
+}
+
+.bg-rain {
+  @apply bg-gradient-to-b from-gray-700 to-black;
+}
+
+.bg-snow {
+  @apply bg-gradient-to-b from-slate-500 to-slate-800;
+}
+
+.bg-ice {
+  @apply bg-gradient-to-b from-slate-600 to-slate-900;
+}
+
+.bg-thunderstorm {
+  @apply bg-gradient-to-b from-gray-800 to-black;
+}
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes progress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+.animate-progress {
+  transform-origin: left;
+  animation: progress 2s linear forwards;
 }
