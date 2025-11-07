@@ -1,27 +1,12 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-roboto: var(--font-roboto-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  @apply font-roboto overflow-x-hidden;
+  
+  @apply font-roboto overflow-x-hidden text-base max-sm:text-sm bg-gray-950 text-gray-50;
 }
 button{
   @apply cursor-pointer hover:translate-0.5;
@@ -163,3 +148,24 @@ button{
   transform-origin: left;
   animation: progress 2s linear forwards;
 }
+
+/* Star base style */
+.star {
+  position: absolute;
+  background-color: white;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: twinkle 2s infinite alternate;
+}
+
+/* Twinkle animation */
+@keyframes twinkle {
+  0% { opacity: 0.4; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0.4; transform: scale(0.8); }
+}
+
+/* Optional: different star sizes/glows via classes */
+.star-small { width: 1px; height: 1px; }
+.star-medium { width: 2px; height: 2px; }
+.star-large { width: 3px; height: 3px; }

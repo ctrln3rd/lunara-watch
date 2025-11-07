@@ -1,0 +1,240 @@
+{
+  "version": "2.0.0",
+  "model_file": "intent_model.onnx",
+  "vocab_size": 421,
+  "max_length": 50,
+  "inputs": {
+    "input_ids": {
+      "name": "input_ids",
+      "type": "int64",
+      "shape": [
+        1,
+        50
+      ],
+      "description": "Tokenized input query (padded/truncated to max_length)"
+    }
+  },
+  "outputs": {
+    "intent_logits": {
+      "name": "intent_logits",
+      "type": "float32",
+      "shape": [
+        1,
+        17
+      ],
+      "classes": [
+        "activity",
+        "alerts",
+        "cloud",
+        "farewell",
+        "feedback",
+        "general",
+        "greetings",
+        "humidity",
+        "moon",
+        "precipitation",
+        "pressure",
+        "sun",
+        "temperature",
+        "unknown",
+        "uv",
+        "visibility",
+        "wind"
+      ],
+      "description": "Logits for main intent classification"
+    },
+    "sub_intent_logits": {
+      "name": "sub_intent_logits",
+      "type": "float32",
+      "shape": [
+        1,
+        19
+      ],
+      "classes": [
+        "direction",
+        "farming",
+        "feels_like",
+        "max",
+        "min",
+        "negative",
+        "none",
+        "outdoor",
+        "phase",
+        "positive",
+        "prep",
+        "rain",
+        "rise",
+        "set",
+        "snow",
+        "speed",
+        "storm",
+        "temp",
+        "travel"
+      ],
+      "description": "Logits for sub-intent classification"
+    },
+    "timeframe_logits": {
+      "name": "timeframe_logits",
+      "type": "float32",
+      "shape": [
+        1,
+        5
+      ],
+      "classes": [
+        "absolute_day",
+        "absolute_time",
+        "none",
+        "relative_day",
+        "relative_time"
+      ],
+      "description": "Logits for timeframe type classification"
+    },
+    "forecast_logits": {
+      "name": "forecast_logits",
+      "type": "float32",
+      "shape": [
+        1,
+        3
+      ],
+      "classes": [
+        "all",
+        "daily",
+        "hourly"
+      ],
+      "description": "Logits for forecast type classification"
+    },
+    "day_offset": {
+      "name": "day_offset",
+      "type": "float32",
+      "shape": [
+        1,
+        1
+      ],
+      "range": [
+        0,
+        1
+      ],
+      "denormalized_range": [
+        0,
+        6
+      ],
+      "description": "Days from now (0=today, 1=tomorrow, etc.)",
+      "denormalize_formula": "Math.round(normalized * 6)"
+    },
+    "hour_of_day": {
+      "name": "hour_of_day",
+      "type": "float32",
+      "shape": [
+        1,
+        1
+      ],
+      "range": [
+        0,
+        1
+      ],
+      "denormalized_range": [
+        0,
+        23
+      ],
+      "description": "Hour within the day (24-hour format)",
+      "denormalize_formula": "Math.round(normalized * 23)"
+    },
+    "day_duration": {
+      "name": "day_duration",
+      "type": "float32",
+      "shape": [
+        1,
+        1
+      ],
+      "range": [
+        0,
+        1
+      ],
+      "denormalized_range": [
+        0,
+        7
+      ],
+      "description": "Number of days in the timeframe",
+      "denormalize_formula": "Math.round(normalized * 7)"
+    },
+    "hour_duration": {
+      "name": "hour_duration",
+      "type": "float32",
+      "shape": [
+        1,
+        1
+      ],
+      "range": [
+        0,
+        1
+      ],
+      "denormalized_range": [
+        0,
+        168
+      ],
+      "description": "Total hours in the timeframe",
+      "denormalize_formula": "Math.round(normalized * 168)"
+    },
+    "confidence": {
+      "name": "confidence",
+      "type": "float32",
+      "shape": [
+        1,
+        1
+      ],
+      "range": [
+        0,
+        1
+      ],
+      "description": "Model confidence score (0-1)"
+    }
+  },
+  "temporal_normalization": {
+    "day_offset": {
+      "range": [
+        0,
+        6
+      ],
+      "description": "Days from now (0=today, 1=tomorrow, etc.)",
+      "denormalize": "normalized * 6"
+    },
+    "hour_of_day": {
+      "range": [
+        0,
+        23
+      ],
+      "description": "Hour within the day (24-hour format)",
+      "denormalize": "normalized * 23"
+    },
+    "day_duration": {
+      "range": [
+        0,
+        7
+      ],
+      "description": "Number of days in the timeframe",
+      "denormalize": "normalized * 7"
+    },
+    "hour_duration": {
+      "range": [
+        0,
+        168
+      ],
+      "description": "Total hours in the timeframe",
+      "denormalize": "normalized * 168"
+    }
+  },
+  "usage_example": {
+    "query": "will it rain tomorrow at 3pm?",
+    "expected_output": {
+      "intent": "precipitation",
+      "sub_intent": "rain",
+      "timeframe_type": "absolute_time",
+      "forecast_type": "hourly",
+      "day_offset": 1,
+      "hour_of_day": 15,
+      "day_duration": 0,
+      "hour_duration": 1,
+      "confidence": 0.95
+    }
+  }
+}

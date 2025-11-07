@@ -1,78 +1,71 @@
-import {
-  addDays,
-  getDay,
-  isBefore,
-  isToday,
-  isTomorrow,
-  startOfWeek,
-  endOfWeek,
-  addWeeks,
-  format,
-} from "date-fns";
+import { DateTime } from "luxon";
 
-type DateInput = Date | string;
 
-export function intelligentDatePhrase(date: DateInput): string {
-  const today = new Date();
-  const startWeek = startOfWeek(today, { weekStartsOn: 1 });
-  const endWeek = endOfWeek(today, { weekStartsOn: 1 });
-  const nextWeekStart = addWeeks(startWeek, 1);
-  const nextWeekEnd = addWeeks(endWeek, 1);
+export function getDateRange(relativeDay: string): {start: string, end: string} {
+  const now = DateTime.now().setZone("local");
+  let start = now;
+  let end = now;
 
-  const d = typeof date === "string" ? new Date(date) : date;
+  const normalize = (d: DateTime) => d.toFormat("yyyy-MM-dd");
 
-  if (isBefore(d, today)) return ""; // ignore past dates
+  switch (relativeDay.toLowerCase()) {
+    case "unspecified":
+      return { start: normalize(now), end: normalize(now) };
 
-  const dayNum = getDay(d);
-  const dayName = format(d, "EEEE").toLowerCase();
+    case "this week":
+      start = now.startOf("week");
+      end = now.endOf("week");
+      break;
 
-  if (isToday(d)) return "today";
-  if (isTomorrow(d)) return "tomorrow";
+    case "next week":
+      start = now.plus({ weeks: 1 }).startOf("week");
+      end = now.plus({ weeks: 1 }).endOf("week");
+      break;
 
-  if (d >= startWeek && d <= endWeek) {
-    if (dayNum === 6) return "this weekend on saturday";
-    if (dayNum === 0) return "this weekend on sunday";
-    return dayName; // weekday this week
+    case "weekend":
+    case "this weekend": {
+      // Assuming weekend = Saturday + Sunday
+      const saturday = now.set({ weekday: 6 });
+      const sunday = now.set({ weekday: 7 });
+      if (now.weekday > 7) {
+        // if past Sunday, move to next week
+        start = saturday.plus({ weeks: 1 });
+        end = sunday.plus({ weeks: 1 });
+      } else {
+        start = saturday;
+        end = sunday;
+      }
+      break;
+    }
+
+    case "next weekend": {
+      const saturday = now.plus({ weeks: 1 }).set({ weekday: 6 });
+      const sunday = now.plus({ weeks: 1 }).set({ weekday: 7 });
+      start = saturday;
+      end = sunday;
+      break;
+    }
+
+    // Handle "in X days"
+    default: {
+      const matchIn = relativeDay.match(/^in (\d+) days$/);
+      const matchNext = relativeDay.match(/^next (\d+) days$/);
+
+      if (matchIn) {
+        const days = parseInt(matchIn[1], 10);
+        start = now.plus({ days });
+        end = start;
+      } else if (matchNext) {
+        const days = parseInt(matchNext[1], 10);
+        start = now;
+        end = now.plus({ days });
+      } else {
+        // fallback = today
+        start = now;
+        end = now;
+      }
+    }
   }
 
-  if (d >= nextWeekStart && d <= nextWeekEnd) {
-    if (dayNum === 6) return "next weekend on saturday";
-    if (dayNum === 0) return "next weekend on sunday";
-    return `${dayName} next week`;
-  }
-
-  return dayName; // fallback
-}
-
-
-function getPartOfDay(hour: number): string {
-  if (hour >= 5 && hour < 12) return "morning";
-  if (hour >= 12 && hour < 17) return "afternoon";
-  if (hour >= 17 && hour < 21) return "evening";
-  return "night";
-}
-
-
-type HourlyInput = Date | string;
-
-export function intelligentHourlyPhrase(hourly: HourlyInput): string {
-  const date = typeof hourly === "string" ? new Date(hourly) : hourly;
-  const now = new Date();
-  const dayNum = getDay(date); // 0 = Sunday
-  const dayName = format(date, "EEEE").toLowerCase();
-  const hour = date.getHours();
-  const minute = date.getMinutes();
-  const partOfDay = getPartOfDay(hour);
-
-  let timeStr = minute > 0 ? `${hour % 12 || 12}:${minute.toString().padStart(2,"0")} ${hour >= 12 ? "PM" : "AM"}` 
-                            : `${hour % 12 || 12} ${hour >= 12 ? "PM" : "AM"}`;
-
-  // Today / Tomorrow
-  if (isToday(date)) return `today ${partOfDay} at ${timeStr}`;
-  if (isTomorrow(date)) return `tomorrow ${partOfDay} at ${timeStr}`;
-
-  // This week or next week
-  const daysFromToday = Math.floor((date.getTime() - now.getTime()) / (1000*60*60*24));
-  if (daysFromToday < 7) return `${dayName} ${partOfDay} at ${timeStr}`;
-  return `${dayName} next week ${partOfDay} at ${timeStr}`;
+  return { start: normalize(start), end: normalize(end) };
 }

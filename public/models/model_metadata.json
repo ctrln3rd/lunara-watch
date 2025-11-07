@@ -1,0 +1,90 @@
+{
+  "vocab_size": 421,
+  "max_length": 50,
+  "intent_classes": [
+    "activity",
+    "alerts",
+    "cloud",
+    "farewell",
+    "feedback",
+    "general",
+    "greetings",
+    "humidity",
+    "moon",
+    "precipitation",
+    "pressure",
+    "sun",
+    "temperature",
+    "unknown",
+    "uv",
+    "visibility",
+    "wind"
+  ],
+  "sub_intent_classes": [
+    "direction",
+    "farming",
+    "feels_like",
+    "max",
+    "min",
+    "negative",
+    "none",
+    "outdoor",
+    "phase",
+    "positive",
+    "prep",
+    "rain",
+    "rise",
+    "set",
+    "snow",
+    "speed",
+    "storm",
+    "temp",
+    "travel"
+  ],
+  "timeframe_classes": [
+    "absolute_day",
+    "absolute_time",
+    "none",
+    "relative_day",
+    "relative_time"
+  ],
+  "forecast_classes": [
+    "all",
+    "daily",
+    "hourly"
+  ],
+  "temporal_normalization": {
+    "day_offset": {
+      "range": [
+        0,
+        6
+      ],
+      "description": "Days from now (0=today, 1=tomorrow, etc.)",
+      "denormalize": "normalized * 6"
+    },
+    "hour_of_day": {
+      "range": [
+        0,
+        23
+      ],
+      "description": "Hour within the day (24-hour format)",
+      "denormalize": "normalized * 23"
+    },
+    "day_duration": {
+      "range": [
+        0,
+        7
+      ],
+      "description": "Number of days in the timeframe",
+      "denormalize": "normalized * 7"
+    },
+    "hour_duration": {
+      "range": [
+        0,
+        168
+      ],
+      "description": "Total hours in the timeframe",
+      "denormalize": "normalized * 168"
+    }
+  }
+}

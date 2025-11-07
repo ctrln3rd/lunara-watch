@@ -1,0 +1,285 @@
+{
+  "intents": [
+    {
+      "intent": "precipitation",
+      "sub_intents": [
+        {
+          "name": "rain",
+          "keywords": ["rain", "raining", "rainfall", "drizzle", "showers", "downpour", "rainy", "rainstorm", "wet weather"]
+        },
+        {
+          "name": "snow",
+          "keywords": ["snow", "snowing", "snowfall", "flurries", "blizzard", "snowstorm", "snowy", "sleet"]
+        }
+      ],
+      "keywords": ["rain", "snow", "precipitation", "wet", "moisture", "rainfall", "snowfall", "drizzle", "showers", "pour", "pouring"],
+      "examples": [
+        "will it rain tomorrow?",
+        "is it snowing today?",
+        "any chance of rain this weekend?",
+        "how much rainfall expected?",
+        "is there precipitation forecast?"
+      ]
+    },
+    {
+      "intent": "temperature",
+      "sub_intents": [
+        {
+          "name": "feels_like",
+          "keywords": ["feels like", "real feel", "apparent temperature", "how it feels", "wind chill", "heat index"]
+        },
+        {
+          "name": "max",
+          "keywords": ["maximum", "highest", "hot", "max temp", "peak temperature", "warmest", "top temperature"]
+        },
+        {
+          "name": "min",
+          "keywords": ["minimum", "lowest", "cold", "min temp", "coolest", "coldest", "bottom temperature"]
+        }
+      ],
+      "keywords": ["temperature", "temp", "hot", "cold", "warm", "cool", "heat", "chilly", "freezing", "degrees", "celsius", "fahrenheit"],
+      "examples": [
+        "what is the temperature today?",
+        "how hot will it be tomorrow?",
+        "what's the high for today?",
+        "how cold will it get tonight?",
+        "temperature forecast for the week"
+      ]
+    },
+    {
+      "intent": "wind",
+      "sub_intents": [
+        {
+          "name": "speed",
+          "keywords": ["wind speed", "how fast", "gust", "strong wind", "wind velocity", "mph", "kph", "knots"]
+        },
+        {
+          "name": "direction",
+          "keywords": ["wind direction", "where is the wind blowing", "from which direction", "north wind", "south wind", "east wind", "west wind"]
+        }
+      ],
+      "keywords": ["wind", "windy", "breeze", "breezy", "gust", "gusty", "gale", "strong breeze", "calm", "still"],
+      "examples": [
+        "is it windy today?",
+        "how strong is the wind?",
+        "where is the wind blowing from?",
+        "wind speed forecast",
+        "will it be gusty tomorrow?"
+      ]
+    },
+    {
+      "intent": "cloud",
+      "keywords": ["cloud", "clouds", "cloudy", "overcast", "clear", "clear sky", "partly cloudy", "partly sunny", "sunny", "cloudiness", "sky condition"],
+      "examples": [
+        "is it cloudy today?",
+        "how clear is the sky?",
+        "will it be sunny tomorrow?",
+        "is the sky overcast?",
+        "cloud coverage forecast"
+      ]
+    },
+    {
+      "intent": "uv",
+      "keywords": ["uv", "ultraviolet", "uv index", "uv level", "sun exposure", "sunburn", "sun protection", "uv rating"],
+      "examples": [
+        "what is the uv index today?",
+        "is the uv high today?",
+        "should I wear sunscreen?",
+        "uv levels this afternoon",
+        "sun exposure risk"
+      ]
+    },
+    {
+      "intent": "humidity",
+      "keywords": ["humidity", "humid", "moisture", "dew point", "muggy", "damp", "dampness", "moisture level", "relative humidity"],
+      "examples": [
+        "what is the humidity today?",
+        "how humid will it be?",
+        "is it muggy outside?",
+        "humidity levels tonight",
+        "will it be damp tomorrow?"
+      ]
+    },
+    {
+      "intent": "pressure",
+      "keywords": ["pressure", "barometric", "atm pressure", "atmospheric pressure", "barometer", "air pressure", "millibars", "inches"],
+      "examples": [
+        "what is the air pressure today?",
+        "how high is the pressure?",
+        "barometric pressure reading",
+        "is pressure rising or falling?",
+        "atmospheric conditions"
+      ]
+    },
+    {
+      "intent": "visibility",
+      "keywords": ["fog", "foggy", "mist", "misty", "haze", "hazy", "clear", "visibility", "smog", "smoky", "visual range"],
+      "examples": [
+        "how clear is it outside?",
+        "is it foggy today?",
+        "visibility conditions",
+        "is there mist this morning?",
+        "how far can I see?"
+      ]
+    },
+    {
+      "intent": "sun",
+      "sub_intents": [
+        {
+          "name": "rise",
+          "keywords": ["sunrise", "sun rise", "dawn", "daybreak", "sun come up", "morning sun", "first light"]
+        },
+        {
+          "name": "set",
+          "keywords": ["sunset", "sun set", "dusk", "twilight", "evening sun", "sun go down", "sundown"]
+        }
+      ],
+      "keywords": ["sun", "sunrise", "sunset", "solar", "daylight", "sunlight"],
+      "examples": [
+        "when is the sunset?",
+        "what time is sunrise?",
+        "when does the sun come up?",
+        "sunset time today",
+        "how much daylight tomorrow?"
+      ]
+    },
+    {
+      "intent": "moon",
+      "sub_intents": [
+        {
+          "name": "phase",
+          "keywords": ["moon phase", "full moon", "new moon", "half moon", "crescent", "waxing", "waning", "gibbous", "lunar phase"]
+        },
+        {
+          "name": "rise",
+          "keywords": ["moonrise", "moon rise", "moon coming up"]
+        },
+        {
+          "name": "set",
+          "keywords": ["moonset", "moon set", "moon going down"]
+        }
+      ],
+      "keywords": ["moon", "lunar", "moonrise", "moonset", "moon phase"],
+      "examples": [
+        "what phase is the moon today?",
+        "when is moonrise?",
+        "is there a full moon tonight?",
+        "moon phase this week",
+        "when does the moon set?"
+      ]
+    },
+    {
+      "intent": "alerts",
+      "sub_intents": [
+        {
+          "name": "prep",
+          "keywords": ["prepare", "warning", "alert", "advisory", "caution", "watch", "emergency"]
+        },
+        {
+          "name": "temp",
+          "keywords": ["heatwave", "heat alert", "cold alert", "temperature warning", "freeze warning", "frost advisory"]
+        },
+        {
+          "name": "storm",
+          "keywords": ["storm", "thunderstorm", "lightning", "tornado", "cyclone", "hurricane", "severe weather", "storm warning"]
+        },
+        {
+          "name": "rain",
+          "keywords": ["flood alert", "flood warning", "heavy rain warning", "flash flood"]
+        }
+      ],
+      "keywords": ["alert", "warning", "advisory", "watch", "emergency", "severe", "danger"],
+      "examples": [
+        "are there any weather warnings?",
+        "any storm alerts today?",
+        "weather advisories this week",
+        "is there a heat warning?",
+        "any severe weather expected?"
+      ]
+    },
+    {
+      "intent": "activity",
+      "sub_intents": [
+        {
+          "name": "outdoor",
+          "keywords": ["outside", "outdoor", "picnic", "walk", "run", "running", "exercise", "sports", "hiking", "camping", "biking"]
+        },
+        {
+          "name": "farming",
+          "keywords": ["farming", "planting", "harvest", "agriculture", "crops", "gardening", "field work"]
+        },
+        {
+          "name": "travel",
+          "keywords": ["travel", "trip", "driving", "flight", "journey", "road trip", "commute", "flying"]
+        }
+      ],
+      "keywords": ["activity", "plan", "planning", "outdoor", "farming", "travel", "should I", "can I", "good for"],
+      "examples": [
+        "is it good for outdoor activities today?",
+        "should I travel tomorrow?",
+        "good weather for hiking?",
+        "can I go camping this weekend?",
+        "is it safe to drive?"
+      ]
+    },
+    {
+      "intent": "greetings",
+      "keywords": ["hello", "hi", "hey", "greetings", "good morning", "good afternoon", "good evening", "howdy", "what's up"],
+      "examples": [
+        "hello",
+        "hi there",
+        "hey, how are you?",
+        "good morning",
+        "greetings"
+      ]
+    },
+    {
+      "intent": "feedback",
+      "sub_intents": [
+        {
+          "name": "positive",
+          "keywords": ["thanks", "thank you", "appreciate", "grateful", "great", "excellent", "perfect", "awesome", "helpful"]
+        },
+        {
+          "name": "negative",
+          "keywords": ["not helpful", "bad", "poor", "useless", "wrong", "incorrect", "disappointing"]
+        }
+      ],
+      "keywords": ["thanks", "thank you", "appreciate", "feedback", "opinion"],
+      "examples": [
+        "thanks for the info",
+        "i appreciate it",
+        "not helpful",
+        "thank you very much",
+        "that was great"
+      ]
+    },
+    {
+      "intent": "farewell",
+      "keywords": ["bye", "goodbye", "see you", "see you later", "take care", "farewell", "catch you later", "until next time"],
+      "examples": [
+        "bye",
+        "see you later",
+        "take care!",
+        "goodbye",
+        "catch you later"
+      ]
+    },
+    {
+      "intent": "general",
+      "keywords": ["weather", "forecast", "today", "tomorrow", "conditions", "report", "how is it", "what's it like", "check weather", "weather update"],
+      "examples": [
+        "how's the weather today?",
+        "what's the forecast for tomorrow?",
+        "give me the weather report",
+        "check the weather",
+        "weather conditions"
+      ]
+    },
+    {
+      "intent": "unknown",
+      "keywords": [],
+      "examples": []
+    }
+  ]
+}

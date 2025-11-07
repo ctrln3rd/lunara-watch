@@ -1,115 +1,104 @@
- import { getWeather } from "./getweather";
- import { WeatherValues, WeatherData } from "./types";
+"use client";
 
-function normalizeWeather(apiResponse: any): {
-  current: WeatherValues | null;
-  hourly: WeatherValues[];
-  daily: WeatherValues[];
-} {
-  const timelines = apiResponse.data.timelines;
+import {fetchTomorrowIoWeatherData} from "./tommorrowioClient";
+import { fetchOpenMeteoWeather } from "./openmeteoClient";
+import type { Weather, Location } from "./types";
 
-  // current (single interval)
-  const current = timelines.find((t: any) => t.timestep === "current")
-    ?.intervals.map((i: any) => ({
-      startTime: i.startTime,
-      ...i.values,
-    }))[0] || null;
+// Cache validity threshold (used only by fetchWeather, not for auto-deletion)
+const CACHE_EXPIRY_MS = 15 * 60 * 1000;
 
-  // hourly intervals
-  const hourly = timelines.find((t: any) => t.timestep === "1h")
-    ?.intervals.map((i: any) => ({
-      startTime: i.startTime,
-      ...i.values,
-    })) || [];
+/**
+ * Get cached weather by lat/lon
+ * (No automatic invalidation — always returns cached data if present)
+ */
+export function getCachedWeather(lat: number, lon: number): Weather | null {
+  const id = `lat${lat}lon${lon}`;
+  const cached = localStorage.getItem(id);
+  if (!cached) return null;
 
-  // daily intervals
-  const daily = timelines.find((t: any) => t.timestep === "1d")
-    ?.intervals.map((i: any) => ({
-      startTime: i.startTime,
-      ...i.values,
-    })) || [];
-
-  return { current, hourly, daily };
-}
-
-
-const STORAGE_KEY = "weather_data";
-
-// 🔹 Get saved weather data (all)
-export function getSavedWeather(): WeatherData[] {
-  if (typeof window === "undefined") return [];
-  const saved = localStorage.getItem(STORAGE_KEY);
-  return saved ? JSON.parse(saved) : [];
-}
-
-// 🔹 Save all weather data
-function saveToStorage(data: WeatherData[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
-// 🔹 Get cached weather for a specific location
-export function getWeatherForLocation(lat: number, lon: number): WeatherData | null {
-  const all = getSavedWeather();
-  return all.find((w) => w.lat === lat && w.lon === lon) || null;
-}
-
-// 🔹 Add or update weather data (localStorage)
-export function saveWeather(locationName: string, lat: number, lon: number, apiResponse: any) {
-  const all = getSavedWeather();
-  const timestamp = Date.now();
-
-  const filtered = normalizeWeather(apiResponse);
-
-  const updated: WeatherData = { locationName, lat, lon, data: filtered, timestamp };
-
-  const idx = all.findIndex((w) => w.lat === lat && w.lon === lon);
-  if (idx >= 0) {
-    all[idx] = updated;
-  } else {
-    all.push(updated);
+  try {
+    const parsed: Weather = JSON.parse(cached);
+    return parsed;
+  } catch (err) {
+    console.error("Failed to parse cached weather:", err);
+    localStorage.removeItem(id);
+    return null;
   }
-
-  saveToStorage(all);
-  return updated;
 }
 
-// 🔹 Delete weather data for a location
-export function deleteWeather(lat: number, lon: number) {
-  const all = getSavedWeather();
-  const updated = all.filter((w) => w.lat !== lat || w.lon !== lon);
-  saveToStorage(updated);
-  return updated;
+/**
+ * Save weather data to localStorage
+ */
+export function saveWeatherToCache(data: Weather) {
+  try {
+    localStorage.setItem(data.id, JSON.stringify(data));
+  } catch (err) {
+    console.warn("Failed to save weather data:", err);
+  }
 }
 
-// 🔹 Get weather (use cache if recent, else fetch new)
-export async function getOrUpdateWeather(
-  locationName: string,
-  lat: number,
-  lon: number,
-  maxAgeMinutes = 30
-): Promise<WeatherData> {
-  const cached = getWeatherForLocation(lat, lon);
+/**
+ * Delete cached weather for a given location
+ */
+export function deleteCachedWeather(lat: number, lon: number) {
+  const id = `lat${lat}lon${lon}`;
+  localStorage.removeItem(id);
+}
 
-  if (cached && Date.now() - cached.timestamp < maxAgeMinutes * 60 * 1000) {
+/**
+ * Fetch fresh weather data — tries Tomorrow.io first, falls back to Open-Meteo.
+ * Uses existing cached data if it's newer than CACHE_EXPIRY_MS.
+ * Otherwise refreshes and updates cache.
+ */
+export async function fetchWeather(location: Location): Promise<Weather| null> {
+  const { lat, lon } = location;
+  const cacheId = `lat${lat}lon${lon}`;
+
+  // 🗂️ 1. Check cache
+  const cached = getCachedWeather(lat, lon);
+  const isExpired = cached ? Date.now() - cached.timestamp > CACHE_EXPIRY_MS : true;
+
+  // ✅ If cache exists and is fresh → return immediately
+  if (cached && !isExpired) {
+    console.log("✅ Using fresh cached weather data for", cacheId);
     return cached;
   }
 
-  const fresh = await getWeather(lat, lon); // call server fn
-  return saveWeather(locationName, lat, lon, fresh);
-}
+  // 🌤️ 2. Try Tomorrow.io first
+  try {
+    console.log("🌍 Fetching from Tomorrow.io...");
+    const result = await fetchTomorrowIoWeatherData(lat, lon);
+    if (!result) return cached ?? null;
 
-// 🔹 Fetch weather (only if last fetch > 15 min ago)
-export async function fetchWeather(locationName: string, lat: number, lon: number): Promise<WeatherData> {
-  const cached = getWeatherForLocation(lat, lon);
-  const FIFTEEN_MIN = 15 * 60 * 1000;
-
-  if (cached && Date.now() - cached.timestamp < FIFTEEN_MIN) {
-    // Too soon → return cached
-    return cached;
+    const weatherData: Weather = {
+      id: cacheId,
+      data: result,
+      timestamp: Date.now(),
+      source: "tomorrow.io",
+    };
+    saveWeatherToCache(weatherData);
+    return weatherData;
+  } catch (err) {
+    console.warn("Tomorrow.io failed, falling back to Open-Meteo:", err);
   }
 
-  // Otherwise → fetch fresh and save
-  const fresh = await getWeather(lat, lon);
-  return saveWeather(locationName, lat, lon, fresh);
-}
+  // 🌦️ 3. Fallback to Open-Meteo
+  try {
+    console.log("🌍 Fetching from Open-Meteo...");
+    const result = await fetchOpenMeteoWeather(lat, lon);
+    if (!result) return cached ?? null;
 
+    const weatherData: Weather = {
+      id: cacheId,
+      data: result,
+      timestamp: Date.now(),
+      source: "open-meteo",
+    };
+    saveWeatherToCache(weatherData);
+    return weatherData;
+  } catch (err) {
+    console.error("Both weather providers failed:", err);
+    // Return old cached data if available instead of null
+    return cached ?? null;
+  }
+}

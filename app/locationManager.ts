@@ -1,55 +1,80 @@
-import { Location } from "./types";
+"use client";
+
+import { Location, LocationType } from "./types";
+import tzlookup from "tz-lookup";
 
 const STORAGE_KEY = "locations";
 
-// 🔹 Get saved locations from localStorage
+// 🔹 Local storage helpers
 export function getSavedLocations(): Location[] {
   if (typeof window === "undefined") return [];
   const saved = localStorage.getItem(STORAGE_KEY);
   return saved ? JSON.parse(saved) : [];
 }
 
-// 🔹 Save locations to localStorage
-function saveToStorage(locations: Location[]) {
+export function saveLocations(locations: Location[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(locations));
 }
 
-// 🔹 Add a new location (limit 5)
+// 🔹 Add or replace location (1 per type)
 export function addLocation(newLoc: Location): Location[] {
   const locations = getSavedLocations();
-  if (locations.find((l) => l.lat === newLoc.lat && l.lon === newLoc.lon)) {
-    return locations; // already exists
+
+  // Fill timezone if missing
+  if (!newLoc.timezone) {
+    newLoc.timezone = tzlookup(newLoc.lat, newLoc.lon);
   }
-  if (locations.length >= 5) {
-    throw new Error("You can only save up to 5 locations.");
+
+  // Replace existing location of the same type
+  const index = locations.findIndex((l) => l.type === newLoc.type);
+  if (index !== -1) {
+    locations[index] = newLoc;
+  } else {
+    locations.push(newLoc);
   }
-  const updated = [...locations, newLoc];
-  saveToStorage(updated);
-  return updated;
+
+  saveLocations(locations);
+  return locations;
 }
 
-// 🔹 Delete a location by name
-export function deleteLocation(name: string): Location[] {
+// 🔹 Delete location by type
+export function deleteLocation(type: Location["type"]): Location[] {
   const locations = getSavedLocations();
-  const updated = locations.filter((l) => l.name !== name);
-  saveToStorage(updated);
+  const updated = locations.filter((l) => l.type !== type);
+  saveLocations(updated);
   return updated;
 }
 
-// 🔹 Try to get user’s current location with reverse geocoding
+// 🔹 Search locations using OpenStreetMap (no API key)
+export async function searchLocations(query: string): Promise<Location[]> {
+  if (!query) return [];
+
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&limit=3&q=${encodeURIComponent(
+      query
+    )}`
+  );
+  const data = await res.json();
+  if (!data || data.length === 0) return [];
+
+  return data.map((place: any) => ({
+    name: place.display_name.split(",")[0],
+    lat: parseFloat(place.lat),
+    lon: parseFloat(place.lon),
+    type: "other",
+    timezone: tzlookup(parseFloat(place.lat), parseFloat(place.lon)),
+  }));
+}
+
+// 🔹 Get current location from browser
 export async function getCurrentLocation(): Promise<Location> {
   return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject("Geolocation not supported");
-      return;
-    }
+    if (!navigator.geolocation) return reject("Geolocation not supported");
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
           const { latitude, longitude } = pos.coords;
-
-          // Use Nominatim reverse geocoding to get city/town name
           const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
           );
@@ -66,31 +91,14 @@ export async function getCurrentLocation(): Promise<Location> {
             name: displayName,
             lat: latitude,
             lon: longitude,
-            isCurrent: true,
+            type: LocationType.Other,
+            timezone: tzlookup(latitude, longitude),
           });
-        } catch (err) {
-          reject("Failed to fetch location name");
+        } catch {
+          reject("Failed to fetch location info");
         }
       },
       (err) => reject(err.message)
     );
   });
-}
-
-// 🔹 Search location with Nominatim (limit 3 results)
-export async function searchLocations(query: string): Promise<Location[]> {
-  const res = await fetch(
-    `https://nominatim.openstreetmap.org/search?format=json&limit=3&q=${encodeURIComponent(
-      query
-    )}`
-  );
-  const data = await res.json();
-  if (data.length === 0) return [];
-
-  return data.map((place: any) => ({
-    name: place.display_name.split(",")[0],
-    lat: parseFloat(place.lat),
-    lon: parseFloat(place.lon),
-    isCurrent: false,
-  }));
 }
